@@ -50,12 +50,18 @@ def cntv_download(url, **kwargs):
          re.match(r'http://\w+.cntv.cn/(\w+/)*VIDE\d+.shtml', url) or \
          re.match(r'http://(\w+).cntv.cn/(\w+)/classpage/video/(\d+)/(\d+).shtml', url) or \
          re.match(r'http://\w+.cctv.com/\d+/\d+/\d+/\w+.shtml', url) or \
-         re.match(r'http://\w+.cntv.cn/\d+/\d+/\d+/\w+.shtml', url): 
+         re.match(r'http://\w+.cntv.cn/\d+/\d+/\d+/\w+.shtml', url):
         page = get_content(url)
         rid = r1(r'videoCenterId","(\w+)"', page)
         if rid is None:
             guid = re.search(r'guid\s*=\s*"([0-9a-z]+)"', page).group(1)
             rid = guid
+    elif re.match(r'http://ncpa-classic\.cntv\.cn/\d+/\d+/\d+/VIDE\d+.shtml', url):
+        page = get_content(url)
+        rid = r1(r"initMyAray=\s'(\w+)'", page)
+        if rid is None:
+            myararrys = re.search(r"myararrys\s*=\s*\[\n'([0-9a-z]+)'", page).group(1)
+            rid = myararrys
     elif re.match(r'http://xiyou.cntv.cn/v-[\w-]+\.html', url):
         rid = r1(r'http://xiyou.cntv.cn/v-([\w-]+)\.html', url)
     else:
