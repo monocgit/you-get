@@ -1723,6 +1723,9 @@ def url_to_module(url):
 
     if video_host.endswith('.com.cn') or video_host.endswith('.ac.cn'):
         video_host = video_host[:-3]
+    # is ncpa-classic
+    if 'ncpa-classic' in video_host:
+        import_module('.'.join(['you_get', 'extractors', 'ncpa']))
     domain = r1(r'(\.[^.]+\.[^.]+)$', video_host) or video_host
     assert domain, 'unsupported url: ' + url
 

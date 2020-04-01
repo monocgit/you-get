@@ -19,7 +19,7 @@ class CNTV(VideoExtractor):
         {'id': '5', 'video_profile': '320x180_200kb/s', 'map_to': 'lowChapters'},
     ]
 
-    ep = 'http://vdn.apps.cntv.cn/api/getHttpVideoInfo.do?pid={}'
+    ep = 'http://vdn.apps.cntv.cn/api/getIpadVideoInfo.do?pid={}'
 
     def __init__(self):
         super().__init__()
@@ -38,7 +38,11 @@ class CNTV(VideoExtractor):
 
 
 def cntv_download_by_id(rid, **kwargs):
-    CNTV().download_by_vid(rid, **kwargs)
+    if type(rid) is list:
+        for e in rid:
+            CNTV().download_by_vid(e, **kwargs)
+    else:
+        CNTV().download_by_vid(rid, **kwargs)
 
 
 def cntv_download(url, **kwargs):
@@ -56,6 +60,26 @@ def cntv_download(url, **kwargs):
         if rid is None:
             guid = re.search(r'guid\s*=\s*"([0-9a-z]+)"', page).group(1)
             rid = guid
+    elif re.match(r'http://ncpa-classic\.cntv\.cn/\d+/\d+/\d+/VIDE\w+.shtml', url):
+        page = get_content(url)
+        rid = r1(r"initMyAray=\s'(\w+)'", page)
+        if rid is None:
+            myararrys = re.search(r"myararrys\s*=\s*\[\n'([0-9a-z]+)'", page).group(1)
+            rid = myararrys
+    elif re.match(r'http://ncpa-classic\.cntv\.cn/\d+/\d+/\d+/VIDA\w+.shtml', url):
+        page = get_content(url)
+        rid = re.findall(r'"(\w{32})"', page)
+
+         #initMyAray=    'edd9109e6fb94dd38590bb1356906c6b';
+
+         # var myararrys = [
+                 #       'edd9109e6fb94dd38590bb1356906c6b'
+                 #               ];
+
+         # var myararrys = [
+                 #       '42f658bf39634ec2be2f578ce7023c5e','09e341a7aee64c0e86f2857ece459467','c34e614f83c24667874837363799ed20',             'ce4bd8afdd514733bae08249dc60e2b0','ef11ac0fa60e436e9483b2fe8cabb668','23c02ca2204849d6a18605f5ddc2eefb','28634cac4b8540fb8372791cbe2ae6e4',  '4d026915dbf2490cb84b9babd095e606','bb78bd10b5224122a180245a0c80f111'
+                 #               ];
+
     elif re.match(r'http://xiyou.cntv.cn/v-[\w-]+\.html', url):
         rid = r1(r'http://xiyou.cntv.cn/v-([\w-]+)\.html', url)
     else:
@@ -66,4 +90,3 @@ def cntv_download(url, **kwargs):
 site_info = "CNTV.com"
 download = cntv_download
 download_playlist = playlist_not_supported('cntv')
-
