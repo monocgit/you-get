@@ -459,6 +459,25 @@ def get_content(url, headers={}, decoded=True):
     return data
 
 
+def content_to_json(content):
+    """A try to deal with the request content to json format.
+       Only for NCPA site now.
+
+    Args:
+        content: Content String.
+
+    Returns:
+        The jason content.
+    """
+    try:
+        json.loads(content)
+    except json.decoder.JSONDecodeError:
+        con1= content.split(";")[0]
+        con2 = con1.split("var html5VideoData = '")[1][:-1]
+        assert con2.startswith("{") and con2.endswith("}")
+        return json.loads(con2)
+
+
 def post_content(url, headers={}, post_data={}, decoded=True, **kwargs):
     """Post the content of a URL via sending a HTTP POST request.
 
@@ -1725,7 +1744,10 @@ def url_to_module(url):
         video_host = video_host[:-3]
     # is ncpa-classic
     if 'ncpa-classic' in video_host:
-        import_module('.'.join(['you_get', 'extractors', 'ncpa']))
+        return (
+            import_module('.'.join(['you_get', 'extractors', 'ncpa'])),
+            url
+        )
     domain = r1(r'(\.[^.]+\.[^.]+)$', video_host) or video_host
     assert domain, 'unsupported url: ' + url
 
